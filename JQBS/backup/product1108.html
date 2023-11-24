@@ -1,0 +1,150 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+         <script type="text/javascript" src="./js/jquery-3.7.1.min.js"></script>
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <!--bootstrap 수정용 css-->
+        <style type="text/css">
+        </style>
+        
+        <title>제품가격 관리 테이블</title>
+    </head>
+    <body>
+        <!--제품명, 가격, 버튼 박스-->
+        <div class="container" style="margin-top: 25px;" id="inputlist">
+            <div class="row">
+                <div class="col">
+                    <div class="input-group mb-3">
+                      <span class="input-group-text" id="inputGroup-sizing-sm">제품명</span>
+                      <input type="text" class="form-control" id="input-product-name" placeholder="제품명을 입력하세요." aria-label="Username" aria-describedby="basic-addon1">
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="input-group mb-3" class="col">
+                      <span class="input-group-text" id="basic-addon1">가격</span>
+                      <input type="number" class="form-control"  id="input-product-price" placeholder="가격을 입력하세요." aria-label="Username" aria-describedby="basic-addon1">
+                    </div>
+                </div>
+                <div class="col">
+                    <input class="btn btn-primary" id="insert-table" type="button" value="추가">
+                    <input class="btn btn-primary" id="delete-table" type="button" value="제거">
+                </div>
+            </div>
+        </div>
+        
+        <!--표 박스-->
+        <div class="container text-center">
+            <table class="table table-hover" id="product-table" >
+              <thead>
+                <tr>
+                  <th>index</th>
+                  <th>제품명</th>
+                  <th>가격</th>
+                </tr>
+              </thead>
+              <tbody class="table table-hover" id="product-table-body">
+                <tr>
+                  <th scope="row">1</th>
+                  <td>햄버거</td>
+                  <td>3000</td>
+                </tr>
+                <tr>
+                  <th scope="row">2</th>
+                  <td>김밥</td>
+                  <td>2000</td>
+                </tr>-
+              </tbody>
+            </table>
+        </div>
+        <!--합계 박스-->
+        <div class="container">
+              <div class="mb-3 row row">
+                  <div class="col-2">
+                    <label for="sumprice" class="col-sm col-form-label">합계 : </label>
+                  </div>
+                <div class="col-8">
+                  <input class="form-control" type="text" id="sumprice" value="합계" aria-label="readonly input example" readonly>
+                </div>
+                <div class="col-2">
+                    <label for="sumprice" class="col-sm-2 col-form-label">원</label>
+                </div>
+              </div>
+        </div>
+        
+        <!--jQuery 스크립트-->
+        <script>
+            $(document).ready(function () {
+                pricesum();
+                
+                //경고문 
+                    const alertPlaceholder = document.getElementById('inputlist')
+                    const appendAlert = (message, type) => {
+                       const wrapper = document.createElement('div')
+                          wrapper.innerHTML = [
+                            `<div class="alert alert-${type} alert-dismissible" id="alertmain" >`,
+                            `   <div>${message}</div>`,
+                            '   <button type="button" id="alertclose" class="btn-close close" data-bs-dismiss="alert"></button>',
+                            '</div>'
+                          ].join('')
+                        
+                          alertPlaceholder.append(wrapper)
+                    }
+                    
+                    $(document).on('click', 'body div.container #alertclose', function(){
+                        console.log("확인");
+                        $("#alertmain").remove();
+                    });
+                
+                //추가
+                $("#insert-table").on('click', function() {
+                    
+                    //공백 경고창 if문
+                    if(!$('#input-product-name').val() && !$('#input-product-price').val()){
+                        appendAlert('이름과 가격을 입력해주세요!', 'danger')
+                    }
+                    else if (!$('#input-product-name').val()) {
+                         appendAlert('이름을 입력해주세요!', 'warning')
+                    }
+                    else if (!$('#input-product-price').val()){
+                        appendAlert('가격을 입력해주세요!', 'warning')
+                    }
+                    else {
+                    var index = $("#product-table tr").length;
+                    var inputname = $("#input-product-name").val();
+                    var inputprice = $("#input-product-price").val();
+                    
+                    var innerHtml = "";
+                    innerHtml += "<tr>";
+                    innerHtml += "<th scope=\"row\">" + index + "</th>";
+                    innerHtml += "<td>" + inputname + "</td>";
+                    innerHtml += "<td>" + inputprice + "</td>";
+                    innerHtml += "</tr>";
+                    
+                    $("#product-table").children('tbody').append(innerHtml);
+                    pricesum();
+                    }
+                });
+                
+                //마지막 한줄 삭제
+                $("#delete-table").on('click', function() {
+                    $("#product-table tbody tr:last").remove();
+                    pricesum();
+                    
+                });
+                
+                //합계 계산
+                function pricesum() {
+                  const table = document.getElementById('product-table');
+                  let sum = 0;
+                  for (let i = 1; i < table.rows.length; i++) {
+                    sum += parseInt(table.rows[i].cells[2].innerHTML);
+                  }
+                  $('#sumprice').val(sum);
+                }
+                
+            });
+        </script>
+    </body>
+</html>

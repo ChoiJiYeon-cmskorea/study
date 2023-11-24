@@ -1,0 +1,352 @@
+<!doctype html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script type="text/javascript" src="./js/jquery-3.7.1.min.js"></script>
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <script src="js/bootstrap.min.js"></script>
+        <!--bootstrap 수정용 css-->
+        <style type="text/css">
+            .btn{
+                margin:5;
+            }
+        </style>
+        
+        <title>제품가격 관리 테이블</title>
+    </head>
+    <body>
+        <!-- Modal -->
+        <div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateProductModal" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+               <h5 class="modal-title" id="exampleModalLabel">제품 정보 수정</h5>
+               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+             </div>
+             <div class="modal-body">
+                <form>
+                  <input type="hidden" id="updateindex" value="0">
+                  <div class="mb-3">
+                    <label for="update-name" class="col-form-label">제품명</label>
+                    <input type="text" class="form-control" id="updatename" aria-label="productname" aria-describedby="basic-addon1">
+                  </div>
+                  <div class="mb-3">
+                    <label for="update-price" class="col-form-label">가격</label>
+                    <input type="number" class="form-control" id="updateprice" aria-label="productprice" aria-describedby="basic-addon1">
+                  </div>
+                </form>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="dataUpdate">수정</button>
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">취소</button>
+              </div>
+            </div>
+          </div>
+        </div>
+            
+        <!--제품명, 가격, 버튼 박스-->
+        <div class="container" style="margin-top: 25px;" id="inputlist">
+            <div class="row">
+                <div class="col">
+                    <div class="input-group mb-3">
+                      <span class="input-group-text" id="inputGroup-sizing-sm">제품명</span>
+                      <input type="text" class="form-control" id="input-product-name" placeholder="제품명을 입력하세요." aria-label="productname" aria-describedby="basic-addon1">
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="input-group mb-3" class="col">
+                      <span class="input-group-text" id="basic-addon1">가격</span>
+                      <input type="number" class="form-control"  id="input-product-price" placeholder="가격을 입력하세요." aria-label="productprice" aria-describedby="basic-addon1">
+                    </div>
+                </div>
+                <div class="col">
+                    <input class="btn btn-primary" id="insert-table" type="button" value="추가">
+                    <!--<input class="btn btn-primary" id="delete-table" type="button" value="제거">-->
+                </div>
+            </div>
+        </div>
+        
+        <!--표 박스-->
+        <div class="container text-center">
+            <table class="table table-hover" id="product-table" >
+              <thead>
+                <tr>
+                  <th>index</th>
+                  <th>제품명</th>
+                  <th>가격</th>
+                  <th>입력/수정시간</th>
+                  <th>작업</th>
+                </tr>
+              </thead>
+              <tbody class="table table-hover" id="product-table-body">
+                <tr>
+                  <th scope="row">1</th>
+                  <td>햄버거</td>
+                  <td>3,000</td>
+                  <td>2023-11-09 09:00:00</td>
+                  <td>
+                      <button type="button" class="btn btn-info iconsearch" data-bs-toggle="modal" data-bs-target="#updateModal">
+                          <img src = './icons/search.svg'/>
+                      </button>
+                      <button type="button" class="btn btn-dark icontrash" style="margin:0;">
+                          <img src = './icons/trash.svg'/>
+                      </button>
+                      
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row">2</th>
+                  <td>김밥</td>
+                  <td>2,000</td>
+                  <td>2023-11-08 12:00:00</td>
+                  <td>
+                      <button type="button" class="btn btn-info iconsearch" data-bs-toggle="modal" data-bs-target="#updateModal">
+                          <img src = './icons/search.svg'/>
+                      </button>
+                      <button type="button" class="btn btn-dark icontrash" style="margin:0;">
+                          <img src = './icons/trash.svg'/>
+                      </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+        </div>
+        <!--합계 박스-->
+        <div class="container">
+              <div class="mb-3 row row">
+                  <div class="col-6">
+                    <label for="sumprice" class="col-sm col-form-label">합계 : </label>
+                  </div>
+                <div class="col-3">
+                  <input class="form-control" type="text" id="sumprice" value="합계" aria-label="readonly input example" readonly>
+                </div>
+                <div class="col-2">
+                    <label for="sumprice" class="col-sm-2 col-form-label">원</label>
+                </div>
+              </div>
+        </div>
+        
+        <div id="test"></div>
+        <!--jQuery 스크립트-->
+        <script>
+            $(document).ready(function () {
+                pricesum();
+                
+                //***********PHP**********
+                
+                
+                $("#testphp").on('click', function() {
+                                          $.ajax({url:"product.php", 
+                        method: "GET",
+                        data: {
+                          "call_name": "getName"
+                        },
+                      success:function(result){
+                      $("#test").text(result);},
+                      error(err) {
+                      console.log(err)
+                      return;
+                      }
+                  })
+                })
+                
+                function setData(){
+                    
+                  var selectedValue = this.value;
+                  $.ajax({
+                    type : 'GET',
+                    url : 'testphp.php',
+                    data : {group:selectedValue},
+                    error : function(){
+                    alert('통신실패');
+                    }, success : function(result){
+                      $('#user').empty();
+                      var users = jQuery.parseJSON(result);
+                      $.each(users, function(){
+                        $('#user').append('<option value="' + this.user + '">' + this.user + '</option>');
+                      });
+                    }
+                  });
+                }
+
+                //***********PHP**********
+                
+                //경고문(입력 경고) 
+                    const alertNamePlaceholder = document.getElementById('inputlist')
+                    const appendNameAlert = (message, type) => {
+                       const wrapper = document.createElement('div')
+                          wrapper.innerHTML = [
+                            `<div class="alert alert-${type} alert-dismissible" id="alertmain" >`,
+                            `   <div>${message}</div>`,
+                            '   <button type="button" id="alertclose" class="btn-close close" data-bs-dismiss="alert"></button>',
+                            '</div>'
+                          ].join('')
+                        
+                          alertNamePlaceholder.append(wrapper)
+                    }
+                    $(document).on('click', 'body div.container #alertclose', function(){
+                        $("#alertmain").remove();
+                    });
+                //경고문(삭제 경고)
+                const alertDeletePlaceholder = document.getElementById('inputlist')
+                const appendDeleteAlert = (message) => {
+                    const Deletewrapper = document.createElement('div')
+                              Deletewrapper.innerHTML = [
+                                `<div class="alert alert-danger alert-dismissible" id="alertDelete">`,
+                                `   <div>${message}</div>`,
+                                '   <button type="button" id="alertDeleteCompleteClose" class="btn btn-danger" data-bs-dismiss="alert">삭제</button>',
+                                '   <button type="button" id="alertDeleteClose" class="btn-close close" data-bs-dismiss="alert"></button>',
+                                '</div>'
+                              ].join('')
+                              alertDeletePlaceholder.append(Deletewrapper)
+                 }
+                
+                //추가
+                $("#insert-table").on('click', function() {
+                    
+                    //공백 경고창 if문
+                    if(!$('#input-product-name').val() && !$('#input-product-price').val()){
+                        appendNameAlert('이름과 가격을 입력해주세요!', 'danger')
+                    }
+                    else if (!$('#input-product-name').val()) {
+                         appendNameAlert('이름을 입력해주세요!', 'warning')
+                    }
+                    else if (!$('#input-product-price').val()){
+                        appendNameAlert('가격을 입력해주세요!', 'warning')
+                    }
+                    else {
+                        var index = $("#product-table tr").length;
+                        var inputname = $("#input-product-name").val();
+                        var inputprice = $("#input-product-price").val()
+                        var inputdate = datetime();
+                        var inputsearch = "<button type='button' class='btn btn-info iconsearch' data-bs-toggle='modal' data-bs-target='#updateModal'><img src = './icons/search.svg'/></button>";
+                        var inputtrash =  "<button type='button' class='btn btn-dark icontrash'><img src = './icons/trash.svg'/></button>";
+                        
+                        var innerHtml = "";
+                        innerHtml += "<tr>";
+                        innerHtml += "<th scope=\"row\">" + index + "</th>";
+                        innerHtml += "<td>" + inputname + "</td>";
+                        innerHtml += "<td>" + inputprice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); + "</td>";
+                        innerHtml += "<td>" + inputdate + "</td>";
+                        innerHtml += "<td>" + inputsearch + inputtrash + "</td>";
+                        innerHtml += "</tr>";
+                        
+                        $("#product-table").children('tbody').append(innerHtml);
+                        pricesum();
+                    }
+                });
+                
+                //마지막 한줄 삭제
+                //$("#delete-table").on('click', function() {
+                //    $("#product-table tbody tr:last").remove();
+                //    pricesum();
+                //    
+                //});
+                
+                //수정 모달 
+                $(document).on('click', 'body div.container .iconsearch', function() {
+                    var thisRow = $(this).closest('tr'); 
+                    var name = thisRow.find('td:eq(0)').text();
+                    var price = thisRow.find('td:eq(1)').text().replace(/[^\d]+/g, "");
+                    
+                    $("#updateindex").attr("value", thisRow.find('th').text());
+                    
+                    var Modal = document.getElementById('updateModal');
+                    
+                    var modalUpdateInsertName = Modal.querySelector('#updatename');
+                    var modalUpdateInsertPrice = Modal.querySelector('#updateprice')
+
+                    modalUpdateInsertName.value = name;
+                    modalUpdateInsertPrice.value = price;
+
+                    //})
+                });
+                
+                
+                //수정 학인 클릭
+                $(document).on('click', '#dataUpdate', function() {
+                    var modalUpdateName = $("#updatename").val()
+                    var modalUpdatePrice = $("#updateprice").val()
+                    modalUpdatePrice = modalUpdatePrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    
+                    var indexdata = parseInt($("#updateindex").attr("value"));
+                    // ▽-------인덱스 접근방식 바꾸기--------!!!
+                    $("#product-table tr:eq(" + indexdata + ") td:eq(0)").html(modalUpdateName);
+                    $("#product-table tr:eq(" + indexdata + ") td:eq(1)").html(modalUpdatePrice);
+                    $("#product-table tr:eq(" + indexdata + ") td:eq(2)").html(datetime());
+                    
+                            
+                    $('#updateModal').modal('hide');
+                    
+                })
+                
+                 const UpdateData = (location, data) => {
+                    
+                   $(location).val(data);
+                   // 모달 닫는 코드 작성
+                   $('#updateModal').modal('hide');
+                  pricesum();
+                  }
+                  
+                  
+                //삭제
+                $(document).on('click', 'body div.container .icontrash', function() {
+                    const table = document.getElementById('product-table');
+                    var thisRow = $(this).closest('tr'); 
+                    var deleteindex = parseInt(thisRow.find('th').text());
+
+                    appendDeleteAlert("정말로 " + deleteindex +"번째 제품정보를 삭제하시겠습니까?")
+                    
+                    $(document).on('click', '#alertDeleteCompleteClose', function() {
+                        thisRow.remove();
+                        for(i = deleteindex; i< table.rows.length + 1; i++){
+                            $("#product-table tbody th:eq(" + (i - 1) + ")").html(i);
+                        }
+                        pricesum();
+                        });
+                    pricesum();
+                });
+                
+                //합계 계산
+                function pricesum() {
+                  const table = document.getElementById('product-table');
+                  let sum = 0;
+                  
+                  for (let i = 1; i < table.rows.length; i++) {
+                    sum += parseInt((table.rows[i].cells[2].innerHTML).replace(/[^\d]+/g, ""));
+                  }
+                  if(sum>10000){
+                      $("#sumprice").attr("class","text-danger");
+                  }
+                  else{
+                      $("#sumprice").attr("class","text-dark");
+                  }
+                  sum = sum.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                  $('#sumprice').val(sum);
+                }
+                
+                //현재날짜 계산
+                function datetime(){
+                    var today = new Date();
+
+                    var year = today.getFullYear();
+                    var month = ('0' + (today.getMonth() + 1)).slice(-2);
+                    var day = ('0' + today.getDate()).slice(-2);
+                    
+                    var dateString = year + '-' + month  + '-' + day;
+                    
+                    var today = new Date();   
+
+                    var hours = ('0' + today.getHours()).slice(-2); 
+                    var minutes = ('0' + today.getMinutes()).slice(-2);
+                    var seconds = ('0' + today.getSeconds()).slice(-2); 
+                    
+                    var timeString = hours + ':' + minutes  + ':' + seconds;
+                    
+                    return dateString +" " + timeString;
+
+                }
+            });
+        </script>
+    </body>
+</html>

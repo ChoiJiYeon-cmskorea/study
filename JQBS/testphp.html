@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+
+<html>
+<meta charset="utf-8">
+<head>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+</head>
+
+<body>
+
+<table>
+
+<thead>
+
+<th colspan="2">
+
+동적 선택박스 예제
+
+</th>
+
+</thead>
+
+<tr>
+
+<td>그룹</td>
+
+<td>
+
+<select name="group" id="group">
+
+<option value="agroup">그룹A</option>
+
+<option value="bgroup">그룹B</option>
+
+</select>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>그룹</td>
+
+<td>
+
+<select name="user" id="user">
+
+<option value="">사용자</option>
+
+</select>
+
+</td>
+
+</tr>
+
+</table>
+
+</body>
+
+</html>
+
+ 
+
+<script type="text/javascript">
+
+  $(document).ready(function(){
+
+    $('#group').change(function(){
+
+      var selectedValue = this.value;
+
+      $.ajax({
+        type : 'GET',
+        url : 'testphp.php',
+        data : {group:selectedValue},
+        error : function(){
+          alert('통신실패');
+
+        }, success : function(result){
+
+          $('#user').empty();
+
+          var users = jQuery.parseJSON(result);
+
+          $.each(users, function(){
+
+            $('#user').append('<option value="' + this.user + '">' + this.user + '</option>');
+
+          });
+
+        }
+
+      });
+
+    });
+
+  });
+
+</script>
