@@ -4,26 +4,19 @@ $DBbook = new DBbookclass();
 
 $searchName="";
 $directory="";
-$fileName="";
-$folder = array(
-		"최"=>"./../file/choi",
-		"홍"=>"./../file/hong",
-		"김"=>"./../file/kim",
-);
+$name="";
 if(isset($_POST['searchName'])){
-	foreach ($folder as $key=>$index){
-		if($key === $_POST['searchName']){
-			$searchName = $_POST['searchName'];
-			$directory = ($folder[$_POST['searchName']]);
-		}
-	}
+	$dblist = $DBbook->DbsearchBook("book", "title", $_POST['searchName'], "*");
+	$rows = mysqli_fetch_assoc($dblist);
+	$searchName = $rows['title'];
+	$directory = $rows['path'];
+	$name = $rows['writer'];
+	$directory = preg_replace("/\\\\/", "/", $directory);
 	
 }
 if(isset($_POST['fileName'])){
 	$fileName= $_POST['fileName'];
 }
-
-
 
 ?>
 <html>
@@ -44,11 +37,11 @@ if(isset($_POST['fileName'])){
 			<div class="m-4 row ">
 				<div class="col-4">
 					<form method="POST" action="bookstoremain.php">
-						<input type="text" list="namelist" id="searchname" name="searchName" placeholder="도서이름 검색">
+						<input type="text" list="namelist" id="searchname" name="searchName" placeholder="책제목 검색">
 						<datalist id="namelist">
-							<option>최</option>
-                            <option>홍</option>
-                            <option>김</option>
+                            <option>홍길동전</option>
+                            <option>동백꽃</option>
+                            <option>별 헤는 밤</option>
                         </datalist>
 						<button class="btn btn-primary">불러오기</button>
 					</form>
@@ -62,16 +55,13 @@ if(isset($_POST['fileName'])){
 							</thead>
 							<tbody>
 								<?php 
-								// 저장된 디렉토리를 연다.
 								// 디렉토리가 존재하면(is_dir)
 								if (is_dir($directory)) {
+									// 저장된 디렉토리를 연다.
 									$handle = opendir($directory);
-									$files = array();
 									$count=1;
-									/*주의 !
-									 readdir은 모든 디렉토리 안에 기본적으로 존재하는 "."과 ".."또한 반환하는데 
-									 이를 조건을 추가하여 제거 해주면 된다.*/
 										while (false !== ($filename = readdir($handle))) {
+											//디렉토리 안에 기본적으로 존재하는 "."과 ".." 제거
 											if($filename == "." || $filename == ".."){
 												continue;
 											}  
@@ -106,10 +96,10 @@ if(isset($_POST['fileName'])){
 				</div>
 				<div class="col-8 mt-2">
 					<div class="d-flex justify-content-between">	
-						<div class="fs-4">도서이름 : <?php echo $searchName?></div>
-						<div ></div>
+						<div>책제목: <?php echo $searchName?></div>
+						<div>글쓴이: <?php echo $name?></div>
 						<div>
-							<input type="text" id="searchtext" name="searchtext" placeholder="문자열 찾기">
+							<input type="text" id="searchtext" name="searchtext" placeholder="문자열 검색">
 							<button class="btn btn-primary mx-3" id="searchtextbtn">검색</button>
 						</div>
 					</div>
@@ -125,25 +115,38 @@ if(isset($_POST['fileName'])){
         </div>
         <script>
         //ajax 함수
-        function ajaxpage(filename) {
-	        $.ajax({
-		        url : 'bookstorepage.php',
-		        type : 'POST',
-		        dataType : 'JSON',
-		        data : {searchName:'<?php echo $searchName; ?>', fileName:filename},
-		        error : function(e){
-		        console.log(e);
-		        }, success : function(result){
-		            $("#init").empty();
-		            for(i = 0 ; i < result.length; i++){
-		            	if(!(result[i] == "\r\n")){
-		            		$("#init").append("<div class='pagetext'>"+result[i]+"</div>");
-		            	}else{
-		            		$("#init").append("<div><br></div>");
-		            	}
-		            }
-		        }
-		    });
+        function updatepage(filename) {
+	        $("#init").empty();
+	        $("img").remove();
+	        
+            extension = filename.slice(filename.indexOf(".") + 1).toLowerCase().trim();
+			//파일 확장자 구분
+            if(extension == "txt"){
+		        $.ajax({
+			        url : 'bookstorepage.php',
+			        type : 'POST',
+			        dataType : 'JSON',
+			        data : {searchName:'<?php echo $searchName; ?>', directory:'<?php echo $directory; ?>', fileName:filename},
+			        error : function(e){
+			        console.log(e);
+			        }, success : function(result){
+			        var txt = "";
+			            for(i = 0 ; i < result.length; i++){
+			            	txt  += result[i] + "<br />";
+			            }
+			            $("#init").append("<p class='pagetext'>"+txt+"</p>");
+			        }
+			    });
+            }
+			else if(extension == "jpg" || extension == "png"){
+				var dir = "<?php echo $directory; ?>";
+				vimg = $('<img>', { 
+                 	'src' : './../file/'+dir.substr(dir.lastIndexOf('/')) +'/'+filename,
+                  	 'width' : '100%',
+                     'height' : '100%'
+              	 });
+            	$(vimg).appendTo('#init'); 
+			}
         }
         $(document).ready(function () {
         	//page 클릭 시 내용확인
@@ -157,8 +160,7 @@ if(isset($_POST['fileName'])){
 	            
 	            $('td').removeClass('bg-primary-subtle')
 	            $(thisRow).find('td:eq(1)').addClass('bg-primary-subtle');
-	            
-				ajaxpage(filename);
+            	updatepage(filename);
             });
             //버튼 클릭시 페이지 이동
             $(document).on('click', '.pagemove',function(){
@@ -183,24 +185,20 @@ if(isset($_POST['fileName'])){
 	            $("#pageclick").append(fileindex);
 	            $(Row).find('td:eq(1)').addClass('bg-primary-subtle');
 	            if(!(pastRow.length == 0)){
-	            	ajaxpage(filename);
+	            	updatepage(filename);
 	            }
             });
             
             //단어 검색
              $(document).on('click', '#searchtextbtn',function(){
-             	$("#pagetext").removeClass('text-decoration-underline');
+             	$("span").removeClass('bg-primary-subtle');
             	var searchtext = $("#searchtext").val();
             	//var textstr = document.getElementBy('pagetext').textContent;
             	//console.log(searchtext);
             	
             	$('.pagetext').each(function(index, item) {
-		            if($(item).text() == "<br>"){
-		            	$(item).text();
-		            }else{
-		            	$(item).html($(item).text().replace(RegExp(searchtext,'gi'),"<span class='bg-primary-subtle'>"+searchtext+"</span>"));
-		            }
-            		
+		            $(item).html($(item).html().replace(RegExp(searchtext,'gi'),"<span class='bg-primary-subtle'>"+searchtext+"</span>"));
+		            		
             	});
 		    });
         });

@@ -18,10 +18,11 @@ readdir은 모든 디렉토리 안에 기본적으로 존재하는 "."과 ".."�
 @closedir($handle);
 
 require_once "./../process/searchfile.php";
-$DBbook = new DBconn();
+$DBbook = new DBbookclass();
 
 $dblist = $DBbook->DbsearchBook("book", "title", "홍", "*");
 $rows = mysqli_fetch_assoc($dblist);
 echo "<pre>";
 var_dump($rows);
 echo "</pre>";
+echo $rows['title'];
