@@ -28,7 +28,7 @@
     border-top: 1px dashed lightgray;
     border-bottom: 1px dashed lightgray;
     overflow :auto;
-    height:500px;
+    height:700px;
 }
 
 .logoutbutton{
@@ -63,7 +63,7 @@
     align-items: center;
     line-height: 50px;
 }
-#searchSelectBox{
+.searchSelectBox{
 background-color: lightgray; 
 border: none;
 width: 120px;

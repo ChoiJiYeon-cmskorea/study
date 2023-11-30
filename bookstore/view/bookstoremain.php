@@ -1,4 +1,7 @@
 <?php
+require_once "./../process/searchfile.php";
+$DBbook = new DBbookclass();
+
 $searchName="";
 $directory="";
 $fileName="";
@@ -8,12 +11,20 @@ $folder = array(
 		"김"=>"./../file/kim",
 );
 if(isset($_POST['searchName'])){
-	$searchName = $_POST['searchName'];
-	$directory = ($folder[$_POST['searchName']]);
+	foreach ($folder as $key=>$index){
+		if($key === $_POST['searchName']){
+			$searchName = $_POST['searchName'];
+			$directory = ($folder[$_POST['searchName']]);
+		}
+	}
+	
 }
 if(isset($_POST['fileName'])){
 	$fileName= $_POST['fileName'];
 }
+
+
+
 ?>
 <html>
     <head>
@@ -30,7 +41,7 @@ if(isset($_POST['fileName'])){
 	        <div class="header row bg-secondary">
 				<h3 class="align-self-center fw-bold"><a class="text-white text-decoration-none" href="bookstoremain.php">CMSKOREA bookstore</a></h3>
 			</div>
-			<div class="m-4 row">
+			<div class="m-4 row ">
 				<div class="col-4">
 					<form method="POST" action="bookstoremain.php">
 						<input type="text" list="namelist" id="searchname" name="searchName" placeholder="도서이름 검색">
@@ -41,10 +52,10 @@ if(isset($_POST['fileName'])){
                         </datalist>
 						<button class="btn btn-primary">불러오기</button>
 					</form>
-					<div class="border mt-2">
+					<div class="border mt-2 contentbox">
 						<table class="table table-hover" id="booklist">
 							<thead>
-							    <tr>
+							    <tr >
 							      <th>번호</th>
 							      <th>이름</th>
 							    </tr>
@@ -66,9 +77,9 @@ if(isset($_POST['fileName'])){
 											}  
 											if(is_file($directory . "/" . $filename)){  
 												?>
-												<tr>
-												<td><?php echo $count?></td>
-												<td><?php echo $filename?> </td>
+												<tr >
+													<td><?php echo $count?></td>
+													<td><?php echo $filename?> </td>
 												</tr>
 												<?php 
 												$count++;
@@ -82,38 +93,116 @@ if(isset($_POST['fileName'])){
 								</tbody>
 						</table>
 					</div>
+					<nav class="d-flex justify-content-center fs-4 mt-2">
+						<div id="pageclick">0</div>
+						<div>/</div>
+						<div id="pageall">
+						<?php if(isset($count)){
+							echo $count-1;
+						}else {echo 0;}
+						?>
+						</div>
+					</nav>
 				</div>
-				<div class="col-8">
-					<div class="d-flex justify-content-end">
-						<button class="btn btn-primary">검색</button>
+				<div class="col-8 mt-2">
+					<div class="d-flex justify-content-between">	
+						<div class="fs-4">도서이름 : <?php echo $searchName?></div>
+						<div ></div>
+						<div>
+							<input type="text" id="searchtext" name="searchtext" placeholder="문자열 찾기">
+							<button class="btn btn-primary mx-3" id="searchtextbtn">검색</button>
+						</div>
 					</div>
-					<div class="border mt-2" id="init">
+					<div class="border mt-2 contentbox p-3" id="init">
 
 					</div>
+					<nav class="d-flex justify-content-center">
+						<button type="button" class="btn btn-light fs-4 pagemove" id="pageleft">◀</button>
+						<button type="button" class="btn btn-light fs-4 pagemove" id="pageright">▶</button>
+					</nav>
 				</div>
 			</div>
         </div>
         <script>
+        //ajax 함수
+        function ajaxpage(filename) {
+	        $.ajax({
+		        url : 'bookstorepage.php',
+		        type : 'POST',
+		        dataType : 'JSON',
+		        data : {searchName:'<?php echo $searchName; ?>', fileName:filename},
+		        error : function(e){
+		        console.log(e);
+		        }, success : function(result){
+		            $("#init").empty();
+		            for(i = 0 ; i < result.length; i++){
+		            	if(!(result[i] == "\r\n")){
+		            		$("#init").append("<div class='pagetext'>"+result[i]+"</div>");
+		            	}else{
+		            		$("#init").append("<div><br></div>");
+		            	}
+		            }
+		        }
+		    });
+        }
         $(document).ready(function () {
+        	//page 클릭 시 내용확인
         	$(document).on('click', 'body div.container #booklist>tbody tr', function() {
 				var thisRow = $(this).closest('tr');
-				filename = (thisRow).find('td:eq(1)').text();
-				$.ajax({
-	            url : 'bookstorepage.php',
-	            type : 'POST',
-	            dataType : 'text',
-	            data : {searchName:'<?php echo $searchName; ?>', fileName:filename},
-	            error : function(e){
-	            console.log(e);
-	            	}, success : function(result){
-	            		console.log(result);
-						for (var i = 0; i <result.length; i++) {
-							$("#init").append("<div>"+result[i]+"</div>");
-						};
-	                }
-	            });
-	            console.log(filename);
+				fileindex = $(thisRow).find('td:eq(0)').text();
+				filename = $(thisRow).find('td:eq(1)').text();
+
+				$("#pageclick").empty();
+	            $("#pageclick").append(fileindex);
+	            
+	            $('td').removeClass('bg-primary-subtle')
+	            $(thisRow).find('td:eq(1)').addClass('bg-primary-subtle');
+	            
+				ajaxpage(filename);
             });
+            //버튼 클릭시 페이지 이동
+            $(document).on('click', '.pagemove',function(){
+            	var pastRow = $(".bg-primary-subtle").closest('tr');
+            	$('td').removeClass('bg-primary-subtle');
+            	pastindex = $(pastRow).find('td:eq(0)').text();
+            	
+            	if($(this).attr("id") =="pageleft"){
+            		Row = $("tbody").find('tr:eq('+(pastindex-2)+')');
+            		fileindex =$(Row).find('td:eq(0)').text();
+            	}else{
+            	    Row = $("tbody").find('tr:eq('+pastindex+')');
+	            	fileindex =$(Row).find('td:eq(0)').text();
+            	}
+	            if (fileindex == ""){
+	            	Row = $("tbody").find('tr:eq(0)');
+	            	fileindex =$(Row).find('td:eq(0)').text();
+	            }
+            	fileindex =$(Row).find('td:eq(0)').text();
+            	filename = $(Row).find('td:eq(1)').text();
+            	$("#pageclick").empty();
+	            $("#pageclick").append(fileindex);
+	            $(Row).find('td:eq(1)').addClass('bg-primary-subtle');
+	            if(!(pastRow.length == 0)){
+	            	ajaxpage(filename);
+	            }
+            });
+            
+            //단어 검색
+             $(document).on('click', '#searchtextbtn',function(){
+             	$("#pagetext").removeClass('text-decoration-underline');
+            	var searchtext = $("#searchtext").val();
+            	//var textstr = document.getElementBy('pagetext').textContent;
+            	//console.log(searchtext);
+            	
+            	$('.pagetext').each(function(index, item) {
+		            if($(item).text() == "<br>"){
+		            	$(item).text();
+		            }else{
+		            	$(item).html($(item).text().replace(RegExp(searchtext,'gi'),"<span class='bg-primary-subtle'>"+searchtext+"</span>"));
+		            }
+            		
+            	});
+		    });
         });
         </script>
     </body>

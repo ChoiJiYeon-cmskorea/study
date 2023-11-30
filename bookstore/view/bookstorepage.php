@@ -11,7 +11,11 @@ if(isset($_POST['searchName'])){
 if(isset($_POST['fileName'])){
 	$fileName= $_POST['fileName'];
 }
+//파일을 읽는다
 if(is_file($directory . "/" . $fileName)){
 	$content = file($directory . "/" .$fileName);
-	return $content;
+	/* echo "<pre>";
+	var_dump($content);
+	echo "</pre>"; */
+	echo json_encode($content);
 }

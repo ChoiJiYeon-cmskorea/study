@@ -9,9 +9,19 @@ while(false !== ($file = readdir($handle))) {
 readdir은 모든 디렉토리 안에 기본적으로 존재하는 "."과 ".."또한 반환하는데 
 이를 조건을 추가하여 제거 해주면 된다.*/
 	if ($file != "." && $file != "..") {
+		
 		echo "file : $file";
 		}
 	}
 }
 // 열었으면 닫는다.
 @closedir($handle);
+
+require_once "./../process/searchfile.php";
+$DBbook = new DBconn();
+
+$dblist = $DBbook->DbsearchBook("book", "title", "홍", "*");
+$rows = mysqli_fetch_assoc($dblist);
+echo "<pre>";
+var_dump($rows);
+echo "</pre>";
