@@ -26,7 +26,7 @@
                     <div class="text-start grid gap-3">
                         <div class="row p-2 g-col-6">
                             <span class="col-3 align-self-center ">아이디</span>
-                            <input  type="text" class="col-8 form-control border-dark-subtle rounded-0" style="width: 70%;" id="name" name="name" >
+                            <input  type="text" class="col-8 form-control border-dark-subtle rounded-0" style="width: 70%;" id="name" name="name">
                         </div>
                         <div class="row p-2 g-col-6">
                             <span class="col-3 align-self-center">비밀번호</span>
@@ -45,45 +45,36 @@
                 <div class="text-start mt-4" id="alertBox"></div>
             </div>
         </div>
+        <script type="text/javascript" src="../js/appendAlert.js"></script>
         <script>
-           	    function checkForm() {
-           	    //경고문 (input 입력)
-                    const appendAlert = (message, type, id) => {
-                    const alertPlaceholder = document.getElementById(id);
-                    const wrapper = document.createElement('div');
-                        wrapper.innerHTML = [
-                         `<div class="alert alert-${type} alert-dismissible alertmainbox" id="alertmain" >`,
-                          `   <div>${message}</div>`,
-                          '   <button type="button" id="alertclose" class="btn-close close" data-bs-dismiss="alert"></button>',
-                          '</div>'
-                        ].join('')
-                        alertPlaceholder.append(wrapper);
-                      } ;
-                    var check = false;
-                    var loginName = $("#name").val();
-                    var loginPassword = $("#password").val();
-                    
-                    if (!loginName) {
-                        $("#alertBox").empty();
-                        appendAlert('&#9888;아이디를 입력해 주세요!', 'danger', 'alertBox');
-                        return check;
-                    } else if(!loginPassword) {
-                        $("#alertBox").empty();
-                       appendAlert('&#9888;비밀번호를 입력해 주세요!', 'danger', 'alertBox');
-                       return check;
-                    } else {
-                        check = true;
-                    }
-                return check;
+            function checkForm() {
+                //경고문 (input 입력)
+                var check = false;
+                var loginName = $("#name").val();
+                var loginPassword = $("#password").val();
+                
+                if (!loginName) {
+                    $("#alertBox").empty();
+                    appendAlert('&#9888;아이디를 입력해 주세요!', 'danger', 'alertBox');
+                    return check;
+                } else if(!loginPassword) {
+                   $("#alertBox").empty();
+                   appendAlert('&#9888;비밀번호를 입력해 주세요!', 'danger', 'alertBox');
+                   return check;
+                } else {
+                    check = true;
                 }
+            return check;
+            }
             $(document).ready(function() {
                 $('#name').focus();
                 
-                //input focus 경고문 삭제
-                $(document).on('focus', '.form-control',function() {
-                    $("#alertBox").empty();
-                })
-                $(document).on('click', '#signupHTML',function() {
+                //경고창 input focus 자동 삭제
+                $('.form-control').click(function() {
+                    $('#alertBox').empty();
+                });
+                //회원가입 화면
+                $('#signupHTML').click(function() {
                     location.href = 'signup.php'; 
                 });
             }); 

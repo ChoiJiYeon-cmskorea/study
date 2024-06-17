@@ -1,0 +1,103 @@
+<?php
+$this->title = "PDF -> JPG TEST";
+$this->headTitle($this->title);
+
+?>
+
+<div>
+    <h6>pdf 파일 선택 시 바로 이미지로 나뉘어 다운로드합니다.</h6>
+    <hr>
+    <form method="post" enctype="multipart/form-data" id="saveForm">
+        <?php
+        echo $this->formfile('saveFileItem', '파일', array('class' => 'saveFile'));
+        //echo $this->formSubmit('saveBtn', '저장', array('class' => 'btn btn-sm btn-info'));
+        ?>
+    </form>
+    <!-- <div>
+        <hr>
+        <div>
+        <h4>PDF 파일 목록</h4>
+        <ul>
+        <?php
+        /* foreach ($this->pdfList as $value) {
+            echo "<li>" . $value['fileName'] . "</li>";
+        } */
+        ?>
+        </ul>
+        </div>
+        <hr>
+        <div>
+        <h4>이미지 파일 목록</h4>
+
+        </div>
+    </div> -->
+</div>
+
+
+<script>
+    var pdf = document.getElementById('saveFileItem');
+
+    // render가 완료되고 실행하기 위해 딜레이를 거는 함수 작성
+    const delay = () => {
+        const randomDelay = Math.floor(Math.random() * 4) * 100
+        return new Promise(resolve => setTimeout(resolve, randomDelay))
+    }
+
+    // pdf가 변경될 시 다운로드 진행
+    pdf.onchange = function(event) {
+        // 파일 가져오기
+        var file = event.target.files[0];
+        var fileReader = new FileReader();
+
+        // 파일 이름 가져오기
+        var fileName = (file.name).split('.')[0];
+        fileReader.readAsDataURL(file);
+
+        // reader가 끝날 시 실행
+        fileReader.onload = function(ev) {
+            // pdf.js
+            pdfjsLib.getDocument(fileReader.result).promise.then((doc)=> {
+                // 동기 처리를 위한 페이지 배열 설정
+                var pdfLength = Array.from({length:doc.numPages}, (v,i)=>i+1);
+
+                // 동기 처리 함수 작성
+                const result = async (list) => {
+                    for (const i of list) {
+                        await delay()
+                        .then(() => {
+                            doc.getPage(i).then(page => {
+                                var viewport = page.getViewport(1);
+                                var canvas = document.createElement('canvas');
+
+                                // 여러 페이지 읽기 작업 -> 다시 읽기 작업 (willReadFrequently) true 설정
+                                // willReadFrequently false 시 console 경고문 출력됨
+                                var ctx = canvas.getContext('2d', {willReadFrequently: true});
+
+                                // 크기 설정
+                                canvas.width = viewport.width;
+                                canvas.height = viewport.height;
+
+                                // 페이지 canvas render
+                                var renderContext = {
+                                    canvasContext: ctx,
+                                    viewport: viewport
+                                };
+
+                                // render가 끝날 시 다운로드 진행
+                                page.render(renderContext).then(function() {
+                                    imgDataUrl = canvas.toDataURL('image/jpeg');
+                                    const link = document.createElement("a");
+                                    link.href = imgDataUrl;
+                                    link.download = fileName + '_' + i;
+                                    link.click();
+                                });
+                            })
+                        })
+                    }
+                }
+                // 동기 처리 실행
+                result(pdfLength);
+            })
+        }
+    }
+</script>

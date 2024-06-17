@@ -16,7 +16,7 @@ if ($mysql) {
 // echo "</pre>";
 
 
-$fileName = "D:\WorkerSpace\wwwroot\score.txt";
+$fileName = "D:/WorkerSpace/wwwroot/test/score.txt";
 
 $scores = file($fileName);
 $scoreDatas = array();

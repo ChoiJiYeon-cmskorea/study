@@ -1,0 +1,25 @@
+body,html {
+    margin: 0 5px;
+    font-family: Verdana,sans-serif;
+}
+body h1 {
+    font-size: 1.4em;
+    color: #2EC4FF;
+}
+body a {
+    color: #1B7599;
+}
+
+/* Table */
+th {
+    text-align: left;
+}
+td, th {
+    padding-right: 5px;
+}
+
+/* style form */
+form {
+    width: 100px;
+    display: block;
+}

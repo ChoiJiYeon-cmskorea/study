@@ -1,0 +1,41 @@
+<?php
+$this->title = "소수점 관리";
+$this->headTitle($this->title);
+echo $this->form ;
+
+$num1 = $this->num1;
+$num2 = $this->num2;
+?>
+<h5>ex) 2.3 * 100</h5>
+<hr>
+<div>
+
+<h4>PHP</h4>
+A * B : <?php echo $num1 * $num2?>
+<br>
+floor(A * B) : <?php echo floor($num1 * $num2)?>
+<br>
+round(A * B) : <?php echo round($num1 * $num2)?>
+<br>
+bcmul(A * B) :    <?php echo bcmul($num1, $num2)?>
+<br>
+</div>
+<hr>
+<h4>Java Script</h4>
+<div id='js'>
+<!-- <h4>Java Script</h4> -->
+
+</div>
+<script>
+$(document).ready(function(){
+    var num1 = <?php echo $num1;?>;
+    var num2 = <?php echo $num2;?>;
+
+    var text = 'A * B : ' + num1 * num2 + '<br>';
+    text += 'Math.floor(A * B) : ' + Math.floor(num1 * num2) + '<br>';
+    text += 'Math.round(A * B) : ' + Math.round(num1 * num2) + '<br>';
+    text += '(A * B).toFixed() : ' + (num1 * num2).toFixed() + '<br>';
+    $('#js').html(text);
+
+});
+</script>

@@ -1,0 +1,50 @@
+<?php
+$this->title = "PHP Excel Test";
+$this->headTitle($this->title);
+
+?>
+<button type="button" id="excelExportBtn" class="btn btn-sm btn-info">내보내기</button>
+<button type="button" id="excelImportBtn" class="btn btn-sm btn-info">가져오기</button>
+<p><a href="<?php echo $this->url(array('controller'=>'index',
+        'action'=>'add'));?>">Add new list</a></p>
+<table id='excel_table'>
+<tr>
+    <th>writer</th>
+    <th>Title</th>
+    <th>Content</th>
+    <th>&nbsp;</th>
+</tr>
+<?php foreach($this->excelList as $list) : ?>
+<tr>
+    <td><?php echo $this->escape($list->writer);?></td>
+    <td><?php echo $this->escape($list->title);?></td>
+    <td><?php echo $this->escape($list->content);?></td>
+    <td>
+        <a href="<?php echo $this->url(array('controller'=>'index',
+                'action'=>'edit', 'pk'=>$list->pk));?>">Edit</a>
+        <a href="<?php echo $this->url(array('controller'=>'index',
+                'action'=>'delete', 'pk'=>$list->pk));?>">Delete</a>
+    </td>
+</tr>
+<?php endforeach; ?>
+</table>
+    <?php echo bcmul('1.34747474747', '35', 3);
+    echo '<br>';
+    echo 2.3 * 100 ;
+    echo '<br>';
+    echo floor(2.3 * 100);
+    ?>
+<script>
+$(document).ready(function(){
+    $("#excelExportBtn").click(function() {
+        console.log('확인');
+    });
+    $("#excelImportBtn").click(function() {
+        console.log('확인');
+    });
+
+    console.log(1.34747474747 * 35);
+    console.log(Math.floor(1.34747474747 * 35));
+
+});
+</script>

@@ -8,3 +8,15 @@ $rows = mysqli_fetch_all($rs);
 echo "<pre>";
 var_dump($rows);
 echo "</pre>";
+$result = array(            'result'    => false,
+        'message'   => '',
+        'leaveRow'  => null);
+$result2 = array();
+
+var_dump($result);
+$result2 = $result;
+var_dump($result2);
+if ($result == $result2) {
+    echo '확인';
+}
+

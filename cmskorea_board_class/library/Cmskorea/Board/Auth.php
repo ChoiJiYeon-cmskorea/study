@@ -21,6 +21,11 @@ class Cmskorea_Board_Auth {
      *
      * @var Cmskorea_Board_Member
      */
+    /**
+     *
+     * @var mysqli 연결 정보
+     *      false 연결 실패
+     */
     protected $_member;
     protected $_db;
     /**
@@ -51,10 +56,14 @@ class Cmskorea_Board_Auth {
         // Cmskorea_Board_Member 로 위임
         $authResult = $this->_member->authenticate($id, $pw);
         // 로그인 성공 시 세션에 회원정보를 저장한다.
-        $memberInfo = $this->_member->getMember($id);
-        $_SESSION[self::SESSION_NAMESPACE] = $memberInfo;
-        
-        return $authResult;
+        if (!$authResult) {
+            $memberInfo = $this->_member->getMember($id);
+            $_SESSION[self::SESSION_NAMESPACE] = $memberInfo;
+            
+            return $authResult;
+        } else {
+            return $authResult;
+        }
     }
 
     /**
@@ -65,7 +74,7 @@ class Cmskorea_Board_Auth {
      */
     public function getMember() {
         if (!isset($_SESSION[self::SESSION_NAMESPACE]) || empty($_SESSION[self::SESSION_NAMESPACE])) {
-            throw new Exception('회원 정보가 설정되지 않았습니다.');
+            throw new Exception('오류 : 회원 정보가 설정되지 않았습니다.');
         }
 
         return $_SESSION[self::SESSION_NAMESPACE];
